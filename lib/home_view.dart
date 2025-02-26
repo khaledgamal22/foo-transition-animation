@@ -7,15 +7,20 @@ class HomeView extends StatefulWidget {
   State<HomeView> createState() => _HomeViewState();
 }
 
-class _HomeViewState extends State<HomeView>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
+class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
+  late AnimationController _blueAnimationController;
+  late AnimationController _blackAnimationController;
   late Animation<AlignmentGeometry> _blueAlignmentAnimation;
   late Animation<AlignmentGeometry> _blackAlignmentAnimation;
 
   @override
   void initState() {
-    _animationController = AnimationController(
+    _blueAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+      reverseDuration: const Duration(seconds: 4),
+    );
+    _blackAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
       reverseDuration: const Duration(seconds: 4),
@@ -23,11 +28,21 @@ class _HomeViewState extends State<HomeView>
     _blueAlignmentAnimation = Tween<AlignmentGeometry>(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
-    ).animate(_animationController);
+    ).animate(_blueAnimationController);
     _blackAlignmentAnimation = Tween<AlignmentGeometry>(
       begin: Alignment.centerLeft,
       end: Alignment.centerRight,
-    ).animate(_animationController);
+    ).animate(_blackAnimationController);
+    _blueAnimationController.addStatusListener((status) {
+      if ((status == AnimationStatus.completed) &&
+          (_blackAnimationController.status == AnimationStatus.dismissed)) {
+        _blackAnimationController.forward();
+      }
+      if ((status == AnimationStatus.dismissed) &&
+          (_blackAnimationController.status == AnimationStatus.completed)) {
+        _blackAnimationController.reverse();
+      }
+    });
     super.initState();
   }
 
@@ -61,41 +76,13 @@ class _HomeViewState extends State<HomeView>
                 ElevatedButton(
                   child: const Text('Forward'),
                   onPressed: () {
-                    _animationController.forward();
+                    _blueAnimationController.forward();
                   },
                 ),
                 ElevatedButton(
                   child: const Text('Reverse'),
                   onPressed: () {
-                    _animationController.reverse();
-                  },
-                ),
-                ElevatedButton(
-                  child: const Text('Stop'),
-                  onPressed: () {
-                    _animationController.stop();
-                  },
-                ),
-                ElevatedButton(
-                  child: const Text('Reset'),
-                  onPressed: () {
-                    _animationController.reset();
-                  },
-                ),
-                ElevatedButton(
-                  child: const Text('Repeat(reverse=false)'),
-                  onPressed: () {
-                    _animationController.repeat(
-                      reverse: false,
-                    );
-                  },
-                ),
-                ElevatedButton(
-                  child: const Text('Repeat(reverse=true)'),
-                  onPressed: () {
-                    _animationController.repeat(
-                      reverse: true,
-                    );
+                    _blueAnimationController.reverse();
                   },
                 ),
               ],
